@@ -7,6 +7,10 @@ from .clients import (
     AnthropicClient,
     AIClientFactory
 )
+from .clients_cli import (
+    ClaudeCLIClient,
+    CodexCLIClient
+)
 from .retry_handler import (
     RetryPolicy,
     RetryHandler,
@@ -51,6 +55,8 @@ __all__ = [
     "OpenAIClient",
     "AnthropicClient",
     "AIClientFactory",
+    "ClaudeCLIClient",
+    "CodexCLIClient",
     "RetryPolicy",
     "RetryHandler",
     "TimeoutError",

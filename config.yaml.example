@@ -19,7 +19,7 @@ git:
   time_basis: author_time
 
 analysis:
-  # AI提供商: openai, anthropic
+  # AI提供商: openai, anthropic, claude_cli, codex_cli
   ai_provider: openai
 
   # AI模型
@@ -40,6 +40,29 @@ analysis:
     base_delay: 1.0
     max_delay: 60.0
     failure_behavior: retry  # retry, continue, abort, fallback
+
+  # CLI客户端配置（使用本地CLI工具）
+  cli_provider:
+    type: api  # api 或 cli
+    # API客户端配置（当 type=api 时）
+    api:
+      provider: openai  # openai 或 anthropic
+      model: gpt-4
+      api_key: ${OPENAI_API_KEY}  # 或使用 ${ANTHROPIC_API_KEY}
+    # CLI客户端配置（当 type=cli 时）
+    cli:
+      claude:
+        enabled: false
+        command: claude
+        path: claude  # CLI命令路径，默认在PATH中
+        args: ["--max-tokens", "4096"]  # 额外参数
+        timeout: 300  # 超时时间（秒）
+      codex:
+        enabled: false
+        command: codex
+        path: codex
+        args: ["--max-tokens", "4096"]
+        timeout: 300
 
 # 外部系统集成配置
 external:
