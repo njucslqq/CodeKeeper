@@ -8,6 +8,7 @@ from .models import (
     BranchData
 )
 from .collector import GitCollector
+from .time_analyzer import TimeAnalyzer
 
 __all__ = [
     "FileChange",
@@ -16,4 +17,5 @@ __all__ = [
     "TagData",
     "BranchData",
     "GitCollector",
+    "TimeAnalyzer",
 ]
