@@ -7,6 +7,12 @@ from .clients import (
     AnthropicClient,
     AIClientFactory
 )
+from .retry_handler import (
+    RetryPolicy,
+    RetryHandler,
+    TimeoutError,
+    retry
+)
 
 __all__ = [
     "TemplateManager",
@@ -14,5 +20,9 @@ __all__ = [
     "AIClientBase",
     "OpenAIClient",
     "AnthropicClient",
-    "AIClientFactory"
+    "AIClientFactory",
+    "RetryPolicy",
+    "RetryHandler",
+    "TimeoutError",
+    "retry"
 ]
