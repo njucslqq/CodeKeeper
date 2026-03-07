@@ -32,7 +32,7 @@ class Document:
     url: Optional[str] = None
 
     # LLM解析结果
-    requirements: List = dict] = None
+    requirements: List[dict] = None
 
     def __post_init__(self):
         if self.requirements is None:

@@ -9,6 +9,7 @@ from .docs.base import DocsSystemBase
 from .docs.models import Document, DocumentType
 from .docs.confluence import ConfluenceDocs
 from .docs.feishu import FeishuDocs
+from .docs.doc_llm_parser import DocLLMParser
 
 __all__ = [
     "IssueTrackerBase",
@@ -24,5 +25,6 @@ __all__ = [
     "Document",
     "DocumentType",
     "ConfluenceDocs",
-    "FeishuDocs"
+    "FeishuDocs",
+    "DocLLMParser"
 ]
