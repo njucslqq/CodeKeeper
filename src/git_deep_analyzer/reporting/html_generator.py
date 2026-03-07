@@ -157,6 +157,35 @@ class HTMLGenerator:
         </div>
 
         <div class="content">
+            {% macro render_section(section) %}
+                <div class="section">
+                    {% if section.level == 1 %}
+                        <h2>{{ section.title }}</h2>
+                    {% elif section.level == 2 %}
+                        <div class="subsection">
+                            <h3>{{ section.title }}</h3>
+                    {% else %}
+                        <h{{ section.level }}>{{ section.title }}</h{{ section.level }}>
+                    {% endif %}
+
+                    <div class="section-content">
+                        {{ section.content }}
+                    </div>
+
+                    {% if section.subsections %}
+                        <div class="subsections">
+                            {% for subsection in section.subsections %}
+                                {{ render_section(subsection) }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if section.level == 2 %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endmacro %}
+
             {% for section in report.sections %}
                 {{ render_section(section) }}
             {% endfor %}
@@ -204,7 +233,7 @@ class HTMLGenerator:
         Returns:
             HTML string
         """
-        return self.template.render(report=report, render_section=self._render_section)
+        return self.template.render(report=report)
 
     def _render_section(self, section: ReportSection) -> str:
         """
