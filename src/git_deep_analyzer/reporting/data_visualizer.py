@@ -64,12 +64,16 @@ class DataVisualizer:
 
         # Add default colors if not provided
         if "datasets" in data:
-            for i, dataset in enumerate(data["datasets"]):
-                if "backgroundColor" not in dataset:
-                    color = self.default_colors[i % len(self.default_colors)]
-                    dataset["backgroundColor"] = color
-                if "borderColor" not in dataset:
-                    dataset["borderColor"] = color.replace('0.8', '1')
+            # Check if datasets is a list of dicts (LINE/BAR) or list of strings (other charts)
+            datasets = data["datasets"]
+            if datasets and isinstance(datasets[0], dict):
+                # LINE or BAR chart with dataset dicts
+                for i, dataset in enumerate(datasets):
+                    if "backgroundColor" not in dataset:
+                        color = self.default_colors[i % len(self.default_colors)]
+                        dataset["backgroundColor"] = color
+                    if "borderColor" not in dataset:
+                        dataset["borderColor"] = str(color).replace('0.8', '1')
 
         # Merge custom options
         if options:

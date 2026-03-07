@@ -21,7 +21,7 @@ class PromptTemplate:
         self.name = name
         self.content = content
         self.category = category
-        self._template = Environment().from_string(content)
+        self._template = Environment(undefined=StrictUndefined).from_string(content)
 
     def render(self, **kwargs) -> str:
         """
