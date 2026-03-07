@@ -8,6 +8,7 @@ from .models import (
 )
 from .html_generator import HTMLGenerator
 from .markdown_generator import MarkdownGenerator
+from .data_visualizer import DataVisualizer, ChartType
 
 __all__ = [
     "ReportFormat",
@@ -15,5 +16,7 @@ __all__ = [
     "ReportSection",
     "ReportData",
     "HTMLGenerator",
-    "MarkdownGenerator"
+    "MarkdownGenerator",
+    "DataVisualizer",
+    "ChartType"
 ]
