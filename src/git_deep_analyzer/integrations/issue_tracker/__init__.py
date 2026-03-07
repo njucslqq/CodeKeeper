@@ -4,6 +4,7 @@ from .base import IssueTrackerBase
 from .models import Issue, IssueComment, IssueAttachment, IssueStatus, IssuePriority
 from .jira import JiraTracker
 from .github import GitHubTracker
+from .gitlab import GitLabTracker
 
 __all__ = [
     "IssueTrackerBase",
@@ -13,5 +14,6 @@ __all__ = [
     "IssueStatus",
     "IssuePriority",
     "JiraTracker",
-    "GitHubTracker"
+    "GitHubTracker",
+    "GitLabTracker"
 ]
