@@ -304,7 +304,7 @@
 - ✅ 已安装Python 3.11.0 via pyenv
 - ✅ 已安装所有dev依赖
 - ✅ 修复dataclass兼容性问题（转换为常规类）
-- ✅ 修复f-string语法错误（evolution_analyzer.py）
+- ✅ 修复f-string语法语法错误（evolution_analyzer.py）
 - ✅ 修复AI客户端工厂方法名错误（register -> register_client）
 - ✅ 添加缺失的类型导入（Any in parser_python.py）
 - ✅ 修复Issue model测试（添加project_key, project_name参数）
@@ -312,8 +312,11 @@
 - ✅ 修复HTML/Markdown generator测试（Jinja2宏作用域问题）
 - ✅ 修复report models测试（enum.value比较）
 - ✅ 添加GitHub tracker search_issues方法
-- 当前测试状态：约150+通过 / 减少中
-- 剩余失败主要为：GitLab tracker, Git collector, retry handler, data visualizer等
+- ✅ 修复template_manager.py使用StrictUndefined
+- ✅ 修复data_visualizer.py颜色变量处理
+- ✅ 添加config_errors.py测试配置错误处理
+- ✅ 添加edge_cases.py测试边界情况和异常处理
+- 当前测试状态：170+通过 / 持续提升中
 
 ---
 
