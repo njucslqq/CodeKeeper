@@ -35,6 +35,14 @@ from .evolution_analyzer import (
     ImpactAnalyzer,
     DebtAnalyzer
 )
+from .analysis_strategy import (
+    AnalysisStrategy,
+    SerialStrategy,
+    ParallelStrategy,
+    LayeredStrategy,
+    IncrementalStrategy,
+    AnalysisExecutor
+)
 
 __all__ = [
     "TemplateManager",
@@ -63,5 +71,11 @@ __all__ = [
     "EvolutionAnalyzer",
     "TimelineAnalyzer",
     "ImpactAnalyzer",
-    "DebtAnalyzer"
+    "DebtAnalyzer",
+    "AnalysisStrategy",
+    "SerialStrategy",
+    "ParallelStrategy",
+    "LayeredStrategy",
+    "IncrementalStrategy",
+    "AnalysisExecutor"
 ]
