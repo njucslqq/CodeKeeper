@@ -13,6 +13,7 @@ from .retry_handler import (
     TimeoutError,
     retry
 )
+from .logger import AILogger, LogConfig
 
 __all__ = [
     "TemplateManager",
@@ -24,5 +25,7 @@ __all__ = [
     "RetryPolicy",
     "RetryHandler",
     "TimeoutError",
-    "retry"
+    "retry",
+    "AILogger",
+    "LogConfig"
 ]
