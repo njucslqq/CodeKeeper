@@ -1,8 +1,10 @@
 from .config import Config, GitConfig, AnalysisConfig, OutputConfig, AIConfig, ReportingConfig
+from .hot_reload import ConfigReloader, ConfigWatcher
 
 __all__ = [
     "Config", "GitConfig", "AnalysisConfig", "OutputConfig",
-    "AIConfig", "ReportingConfig"
+    "AIConfig", "ReportingConfig",
+    "ConfigReloader", "ConfigWatcher"
 ]
 
 # 可选导入（需要click）
