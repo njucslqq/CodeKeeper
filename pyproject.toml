@@ -3,7 +3,7 @@ name = "git-deep-analyzer"
 version = "0.1.0"
 description = "Deep analysis of git commits with AI-powered insights"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 dependencies = [
     "click>=8.1.0",
     "GitPython>=3.1.40",

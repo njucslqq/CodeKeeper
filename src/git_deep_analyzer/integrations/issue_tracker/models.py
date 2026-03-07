@@ -29,7 +29,7 @@ class IssuePriority(Enum):
 @dataclass
 class IssueComment:
     """Issue评论"""
-    id: str
+    id_str: str
     author: str
     author_email: str
     content: str
