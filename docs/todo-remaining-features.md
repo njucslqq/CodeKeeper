@@ -20,29 +20,7 @@
 
 ### 未实现组件
 
-#### 2.3 GitLab Issue Tracker集成
-- 完整的GitLab Issues API集成
-- 支持GitLab personal access token认证
-- 完整的Issue数据提取（评论、附件、标签、milestone）
-- Issue状态和标签的完整映射
-- GitLab特定字段（weight、confidential等）
-
-#### 2.4 GitHub Issue Tracker集成
-- GitHub Issues API集成（REST API v3）
-- 支持GitHub personal access token
-- Issue和Pull Request的区分
-- Review comments提取
-- Reaction和Milestone关联
-- CI/CD状态关联
-
-#### 2.7 飞书文档系统集成
-- 飞书Open API集成
-- 文档（Doc/Sheet/Wiki）提取
-- 文档块（Node）结构解析
-- 文本格式化处理
-- 多媒体内容处理
-
-#### 2.9 文档LLM解析器（部分在base类中）
+#### 2.9 文档LLM解析器
 - 完整的文档内容LLM解析
 - 智能需求提取
 - 业务目标识别
@@ -62,6 +40,21 @@
 - Issue完整数据提取
 - 搜索功能
 
+#### 2.3 GitLab Issue Tracker集成
+- 完整的GitLab Issues API集成
+- 支持GitLab personal access token认证
+- 完整的Issue数据提取（评论、附件、标签、milestone）
+- Issue状态和标签的完整映射
+- GitLab特定字段（weight、confidential等）
+
+#### 2.4 GitHub Issue Tracker集成 ✅ **新增**
+- GitHub Issues API集成（REST API v3）
+- 支持GitHub personal access token
+- Issue和Pull Request的区分
+- Review comments提取
+- Reaction和Milestone关联
+- CI/CD状态关联
+
 #### 2.5 文档系统基类和数据模型 ✅
 - DocsSystemBase抽象类
 - Document数据模型
@@ -72,6 +65,13 @@
 - CQL查询支持
 - 空间和标签过滤
 - 文档类型推断
+
+#### 2.7 飞书文档系统集成 ✅ **新增**
+- 飞书Open API集成
+- 文档（Doc/Sheet/Wiki）提取
+- 文档块（Node）结构解析
+- 文本格式化处理
+- 多媒体内容处理
 
 #### 2.8 Issue-Commit关联器 ✅
 - 基于提交消息的关联（策略A）
