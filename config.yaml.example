@@ -1,0 +1,129 @@
+# Git Deep Analyzer - Configuration Example
+# Copy this file to config.yaml and customize for your project
+
+analysis:
+  git:
+    repo_path: /path/to/your/repository
+    branch: main
+
+    # Time filter options
+    time_filter:
+      mode: date_range  # Options: date_range, last_n_days
+
+      # For date_range mode:
+      date_range:
+        since: "2024-01-01"  # Start date (YYYY-MM-DD)
+        until: null          # End date (optional, null = now)
+
+      # For last_n_days mode:
+      # last_n_days:
+      #   days: 30
+
+      # Time basis for commits
+      time_basis: author_time  # Options: author_time, commit_time, merge_time
+
+  languages:
+    primary: [cpp, python]
+    fallback: auto
+
+  output:
+    formats: [html, markdown]
+    directory: ./reports
+    filename_pattern: "{repo}-{branch}-{timestamp}"
+
+# AI Analysis Configuration
+ai:
+  enabled: true
+
+  # API Provider (OpenAI, Anthropic, etc.)
+  provider:
+    type: api
+    name: openai
+    model: gpt-4o
+    api_key: ${OPENAI_API_KEY}  # Use environment variable
+    base_url: null  # Optional: custom API endpoint
+    max_tokens: 4000
+    temperature: 0.3
+
+  # CLI Provider (Claude CLI, Codex CLI, etc.)
+  # cli:
+  #   command: claude
+  #   args:
+  #     - "analyze"
+  #     - "--prompt"
+  #     - "{prompt}"
+  #     - "--file"
+  #     - "{file_path}"
+  #     - "--output"
+  #     - "json"
+  #   env_vars:
+  #     - "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}"
+
+  # Error Handling
+  error_handling:
+    retry:
+      enabled: true
+      max_attempts: 3
+      backoff: exponential
+    timeout:
+      enabled: true
+      seconds: 300
+    on_failure: retry  # Options: retry, continue, abort, fallback
+
+  # Logging
+  logging:
+    level: debug  # Options: debug, info, warn, error
+    log_file: ./ai_analysis.log
+    log_to_stdout: true
+
+  # Execution Strategy
+  execution_strategy: serial  # Options: serial, parallel, layered, incremental
+
+# Reporting Configuration
+reporting:
+  sections:
+    - overview
+    - technical_analysis
+    - business_analysis
+    - evolution
+    - recommendations
+
+  include_raw_data: false
+  language: zh-CN
+  detail_level: standard  # Options: concise, standard, detailed
+
+# External System Integrations (Optional)
+integrations:
+  enabled: false
+  plugin_path: ./integrations
+
+  issue_tracker:
+    type: jira  # Options: jira, gitlab, github, none
+    enabled: false
+    config:
+      url: https://your-domain.atlassian.net
+      token: ${JIRA_TOKEN}
+      project_key: PROJ
+
+  docs:
+    enabled: false
+    sources:
+      - type: confluence
+        enabled: false
+        config:
+          url: https://your-domain.atlassian.net/wiki
+          token: ${CONFLUENCE_TOKEN}
+          space_key: DEV
+
+      - type: feishu
+        enabled: false
+        config:
+          token: ${FEISHU_TOKEN}
+
+# Commit Convention (Optional)
+commit_convention:
+  type: conventional_commits  # Options: conventional_commits, custom, none
+  spec_path: docs/commit-spec.md
+  patterns:
+    - "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore):"
+    - "^\\[\\w+\\] .+"
