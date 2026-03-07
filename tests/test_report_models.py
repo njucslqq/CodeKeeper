@@ -17,9 +17,9 @@ class TestReportFormat:
         When: Accessing values
         Then: Returns expected formats
         """
-        assert ReportFormat.HTML == "html"
-        assert ReportFormat.MARKDOWN == "markdown"
-        assert ReportFormat.JSON == "json"
+        assert ReportFormat.HTML.value == "html"
+        assert ReportFormat.MARKDOWN.value == "markdown"
+        assert ReportFormat.JSON.value == "json"
 
     def test_all_formats_defined(self):
         """Given: ReportFormat enum
@@ -40,9 +40,9 @@ class TestReportDetailLevel:
         When: Accessing values
         Then: Returns expected levels
         """
-        assert ReportDetailLevel.CONCISE == "concise"
-        assert ReportDetailLevel.STANDARD == "standard"
-        assert ReportDetailLevel.DETAILED == "detailed"
+        assert ReportDetailLevel.CONCISE.value == "concise"
+        assert ReportDetailLevel.STANDARD.value == "standard"
+        assert ReportDetailLevel.DETAILED.value == "detailed"
 
     def test_all_levels_defined(self):
         """Given: ReportDetailLevel enum
