@@ -218,7 +218,7 @@ class TestRetryHandler:
         with pytest.raises(ValueError):
             handler.execute(func)
 
-        assert func.call_count == 3  # 1 initial + 2 retries
+        assert func.call_count == 1  # abort模式在第一次失败时就立即raise，不重试  # 1 initial + 2 retries
 
     def test_continue_failure_behavior(self):
         """Given: Handler with continue failure behavior
