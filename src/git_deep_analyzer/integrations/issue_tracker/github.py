@@ -116,19 +116,21 @@ class GitHubTracker(IssueTrackerBase):
 
             # Parse issues (both issues and PRs)
             for issue_data in data:
-                issue = self._parse_issue(issue_data)
+                issue = self._parse_issue(issue_data, owner, repo)
                 all_issues.append(issue)
 
             page += 1
 
         return all_issues
 
-    def _parse_issue(self, issue_data: dict) -> Issue:
+    def _parse_issue(self, issue_data: dict, repo_owner: str, repo_name: str) -> Issue:
         """
         Parse issue data from GitHub API response.
 
         Args:
             issue_data: Issue data from API
+            repo_owner: Repository owner
+            repo_name: Repository name
 
         Returns:
             Issue object
@@ -139,42 +141,74 @@ class GitHubTracker(IssueTrackerBase):
         # Map GitHub state to IssueStatus
         state = issue_data.get("state", "open")
         if state == "open":
-            status = IssueStatus.OPEN
-        elif state == "closed":
-            status = IssueStatus.CLOSED
-        else:
             status = IssueStatus.IN_PROGRESS
+        elif state == "closed":
+            status = IssueStatus.DONE
+        else:
+            status = IssueStatus.TODO
 
         # Map labels to priority
         labels = [label.get("name", "") for label in issue_data.get("labels", [])]
         priority = self._map_labels_to_priority(labels)
 
-        # Parse comments count
-        comments_count = issue_data.get("comments", 0)
+        # Parse author
+        user_data = issue_data.get("user", {})
+        reporter = user_data.get("login", "")
+        reporter_email = f"{reporter}@users.noreply.github.com" if reporter else ""
+
+        # Parse assignee
+        assignee_data = issue_data.get("assignee")
+        assignee = None
+        assignee_email = None
+        if assignee_data:
+            assignee = assignee_data.get("login", "")
+            assignee_email = f"{assignee}@users.noreply.github.com"
+
+        # Parse times
+        created_at = datetime.fromisoformat(
+            issue_data.get("created_at", "").replace("Z", "+00:00")
+        )
+        updated_at = datetime.fromisoformat(
+            issue_data.get("updated_at", "").replace("Z", "+00:00")
+        )
+        closed_at_str = issue_data.get("closed_at")
+        resolved_at = None
+        if closed_at_str:
+            resolved_at = datetime.fromisoformat(closed_at_str.replace("Z", "+00:00"))
 
         # Parse milestone
         milestone = issue_data.get("milestone")
         milestone_title = milestone.get("title") if milestone else None
 
+        # Project info
+        project_key = f"{repo_owner}/{repo_name}"
+        project_name = repo_name
+
+        # Build issue summary (include milestone if present)
+        summary = issue_data.get("title", "")
+        if milestone_title:
+            summary = f"[{milestone_title}] {summary}"
+
         return Issue(
-            key=str(issue_data.get("number")),
-            title=issue_data.get("title", ""),
+            id=str(issue_data.get("id", "")),
+            key=str(issue_data.get("number", "")),
+            summary=summary,
             description=issue_data.get("body", "") or "",
             status=status,
             priority=priority,
-            author=issue_data.get("user", {}).get("login", ""),
-            created_at=datetime.fromisoformat(
-                issue_data.get("created_at", "").replace("Z", "+00:00")
-            ),
-            updated_at=datetime.fromisoformat(
-                issue_data.get("updated_at", "").replace("Z", "+00:00")
-            ),
+            labels=labels,
+            created_at=created_at,
+            updated_at=updated_at,
+            resolved_at=resolved_at,
+            reporter=reporter,
+            reporter_email=reporter_email,
+            assignee=assignee,
+            assignee_email=assignee_email,
             comments=[],
             attachments=[],
-            labels=labels,
-            milestone=milestone_title,
-            url=issue_data.get("html_url", ""),
-            is_pull_request=is_pr
+            relations=[],
+            project_key=project_key,
+            project_name=project_name
         )
 
     def _map_labels_to_priority(self, labels: List[str]) -> IssuePriority:
@@ -195,6 +229,43 @@ class GitHubTracker(IssueTrackerBase):
             return IssuePriority.LOW
         else:
             return IssuePriority.MEDIUM
+
+    def fetch_issue_detail(
+        self,
+        issue_number: int,
+        owner: str,
+        repo: str
+    ) -> Issue:
+        """
+        Fetch issue details including comments.
+
+        Args:
+            issue_number: Issue number
+            owner: Repository owner
+            repo: Repository name
+
+        Returns:
+            Issue with comments
+        """
+        if not self.session:
+            raise RuntimeError("Not connected to GitHub API")
+
+        url = f"{self.base_url}/repos/{owner}/{repo}/issues/{issue_number}"
+        params = {"per_page": 100}
+
+        response = self.session.get(url, params=params, timeout=30)
+
+        if response.status_code != 200:
+            raise RuntimeError(f"GitHub API error: {response.text}")
+
+        issue_data = response.json()
+        issue = self._parse_issue(issue_data, owner, repo)
+
+        # Fetch comments
+        comments = self.fetch_comments(issue_number, owner, repo)
+        issue.comments = comments
+
+        return issue
 
     def fetch_comments(
         self,
@@ -271,7 +342,7 @@ class GitHubTracker(IssueTrackerBase):
         # Parse issues from search results
         issues = []
         for item in data.get("items", []):
-            issue = self._parse_issue(item)
+            issue = self._parse_issue(item, owner, repo)
             issues.append(issue)
 
         return issues
@@ -293,7 +364,58 @@ class GitHubTracker(IssueTrackerBase):
         Returns:
             List of pull requests
         """
-        # Fetch all issues and filter PRs
-        issues = self.fetch_issues(owner=owner, repo=repo, state=state)
-        prs = [issue for issue in issues if issue.is_pull_request]
-        return prs
+        if not self.session:
+            raise RuntimeError("Not connected to GitHub API")
+
+        # Use GitHub pull requests API directly
+        url = f"{self.base_url}/repos/{owner}/{repo}/pulls"
+
+        params = {}
+        if state:
+            params["state"] = state
+        params["per_page"] = 100
+        params["sort"] = "created"
+        params["direction"] = "asc"
+
+        all_prs = []
+        page = 1
+
+        while True:
+            params["page"] = page
+
+            response = self.session.get(url, params=params, timeout=30)
+
+            if response.status_code != 200:
+                raise RuntimeError(f"GitHub API error: {response.text}")
+
+            data = response.json()
+
+            if not data:
+                break
+
+            # Parse pull requests
+            for pr_data in data:
+                # Use PR number as key
+                pr_issue = self._parse_issue(
+                    {
+                        **pr_data,
+                        "id": pr_data.get("id", ""),
+                        "number": pr_data.get("number", ""),
+                        "title": f"[PR] {pr_data.get('title', '')}",
+                        "body": pr_data.get("body", "") or "",
+                        "state": pr_data.get("state", "open"),
+                        "labels": pr_data.get("labels", []),
+                        "user": pr_data.get("user", {}),
+                        "created_at": pr_data.get("created_at", ""),
+                        "updated_at": pr_data.get("updated_at", ""),
+                        "closed_at": pr_data.get("closed_at"),
+                        "assignee": pr_data.get("assignee")
+                    },
+                    owner,
+                    repo
+                )
+                all_prs.append(pr_issue)
+
+            page += 1
+
+        return all_prs
