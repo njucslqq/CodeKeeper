@@ -299,9 +299,11 @@ class GitHubTracker(IssueTrackerBase):
 
         comments = []
         for comment_data in comments_data:
+            user_login = comment_data.get("user", {}).get("login", "")
             comment = IssueComment(
-                id=str(comment_data.get("id")),
-                author=comment_data.get("user", {}).get("login", ""),
+                id_str=str(comment_data.get("id")),
+                author=user_login,
+                author_email=f"{user_login}@users.noreply.github.com" if user_login else "",
                 content=comment_data.get("body", ""),
                 created_at=datetime.fromisoformat(
                     comment_data.get("created_at", "").replace("Z", "+00:00")
@@ -419,3 +421,49 @@ class GitHubTracker(IssueTrackerBase):
             page += 1
 
         return all_prs
+
+    def search_issues(self, query: str, owner: Optional[str] = None, repo: Optional[str] = None) -> List[Issue]:
+        """
+        Search issues and pull requests.
+
+        Args:
+            query: Search query (GitHub search syntax)
+            owner: Repository owner (optional, defaults to repo_owner from config)
+            repo: Repository name (optional, defaults to repo_name from config)
+
+        Returns:
+            List of Issues/PRs matching the search query
+        """
+        if not self.session:
+            raise RuntimeError("Not connected to GitHub API")
+
+        owner = owner or self.config.get("repo_owner", "")
+        repo = repo or self.config.get("repo_name", "")
+
+        if not owner or not repo:
+            raise ValueError("owner and repo are required")
+
+        # Use GitHub search API
+        url = f"{self.base_url}/search/issues"
+
+        # Build search query with repo qualifier
+        full_query = f"repo:{owner}/{repo} {query}"
+
+        params = {
+            "q": full_query,
+            "per_page": 100
+        }
+
+        response = self.session.get(url, params=params, timeout=30)
+
+        if response.status_code != 200:
+            raise RuntimeError(f"GitHub API error: {response.text}")
+
+        data = response.json()
+
+        issues = []
+        for item in data.get("items", []):
+            issue = self._parse_issue(item, owner, repo)
+            issues.append(issue)
+
+        return issues

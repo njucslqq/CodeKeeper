@@ -42,9 +42,10 @@ class TestIssueModels:
             labels=["bug", "feature"],
             created_at=datetime.now(),
             updated_at=datetime.now(),
-            resolved_at=None,
             reporter="Test User",
-            reporter_email="test@example.com"
+            reporter_email="test@example.com",
+            project_key="PROJ",
+            project_name="Test Project"
         )
 
         # Then
@@ -96,9 +97,11 @@ class TestIssueModels:
             labels=["resolved"],
             created_at=datetime.now(),
             updated_at=datetime.now(),
-            resolved_at=resolved_at,
             reporter="Test User",
-            reporter_email="test@example.com"
+            reporter_email="test@example.com",
+            project_key="PROJ",
+            project_name="Test Project",
+            resolved_at=resolved_at
         )
 
         # Then
@@ -119,6 +122,8 @@ class TestIssueModels:
             updated_at=datetime.now(),
             reporter="Test User",
             reporter_email="test@example.com",
+            project_key="PROJ",
+            project_name="Test Project",
             assignee="Assignee User",
             assignee_email="assignee@example.com"
         )
@@ -130,38 +135,36 @@ class TestIssueModels:
     def test_issue_comment_model(self):
         """测试IssueComment模型"""
         # Given
-        comment = {
-            "id": "comment-1",
-            "author": "Commenter",
-            "author_email": "commenter@example.com",
-            "content": "Test comment",
-            "created_at": datetime.now()
-        }
+        from git_deep_analyzer.integrations.issue_tracker.models import IssueComment
 
         # When
-        from .models import IssueComment
-        comment_obj = IssueComment(**comment)
+        comment_obj = IssueComment(
+            id_str="comment-1",
+            author="Commenter",
+            author_email="commenter@example.com",
+            content="Test comment",
+            created_at=datetime.now()
+        )
 
         # Then
-        assert comment_obj.id == "comment-1"
+        assert comment_obj.id_str == "comment-1"
         assert comment_obj.author == "Commenter"
         assert isinstance(comment_obj.created_at, datetime)
 
     def test_issue_attachment_model(self):
         """测试IssueAttachment模型"""
         # Given
-        attachment = {
-            "id": "att-1",
-            "filename": "test.png",
-            "url": "http://example.com/test.png",
-            "size": 1024,
-            "content_type": "image/png",
-            "created_at": datetime.now()
-        }
+        from git_deep_analyzer.integrations.issue_tracker.models import IssueAttachment
 
         # When
-        from .models import IssueAttachment
-        attachment_obj = IssueAttachment(**attachment)
+        attachment_obj = IssueAttachment(
+            id="att-1",
+            filename="test.png",
+            url="http://example.com/test.png",
+            size=1024,
+            content_type="image/png",
+            created_at=datetime.now()
+        )
 
         # Then
         assert attachment_obj.filename == "test.png"
@@ -171,15 +174,14 @@ class TestIssueModels:
     def test_issue_relation_model(self):
         """测试IssueRelation模型"""
         # Given
-        relation = {
-            "type": "blocks",
-            "issue_id": "PROJ-100",
-            "issue_summary": "Blocked issue"
-        }
+        from git_deep_analyzer.integrations.issue_tracker.models import IssueRelation
 
         # When
-        from .models import IssueRelation
-        relation_obj = IssueRelation(**relation)
+        relation_obj = IssueRelation(
+            type="blocks",
+            issue_id="PROJ-100",
+            issue_summary="Blocked issue"
+        )
 
         # Then
         assert relation_obj.type == "blocks"

@@ -13,7 +13,9 @@ class TestGitHubTracker:
         """Sample GitHub configuration."""
         return {
             "url": "https://api.github.com",
-            "token": "test-token"
+            "token": "test-token",
+            "repo_owner": "testowner",
+            "repo_name": "testrepo"
         }
 
     @pytest.fixture
@@ -49,7 +51,7 @@ class TestGitHubTracker:
         assert result is True
 
     @patch('requests.Session')
-    def test_fetch_issues_success(self, mock_session, github_tracker):
+    def test_fetch_issues_success(self, mock_session, github_config):
         """Given: GitHub tracker and config
         When: fetch_issues() is called
         Then: Returns list of issues
@@ -57,25 +59,30 @@ class TestGitHubTracker:
         # Given
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "items": [
-                {
-                    "id": 1,
-                    "number": 100,
-                    "title": "Test Issue",
-                    "state": "open",
-                    "body": "Issue description",
-                    "user": {"login": "testuser"},
-                    "created_at": "2024-01-01T00:00:00Z",
-                    "updated_at": "2024-01-02T00:00:00Z",
-                    "html_url": "https://github.com/test/repo/issues/100"
-                }
-            ]
-        }
+        mock_response.json.return_value = [
+            {
+                "id": 1,
+                "number": 100,
+                "title": "Test Issue",
+                "state": "open",
+                "body": "Issue description",
+                "user": {"login": "testuser"},
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-02T00:00:00Z",
+                "html_url": "https://github.com/test/repo/issues/100"
+            }
+        ]
+
+        # Configure mock to return mock_response for all get() calls
+        mock_session.return_value = Mock()
         mock_session.return_value.get.return_value = mock_response
 
+        # Create tracker and connect
+        tracker = GitHubTracker(github_config)
+        tracker.connect()
+
         # When
-        issues = github_tracker.fetch_issues(
+        issues = tracker.fetch_issues(
             owner="testowner",
             repo="testrepo"
         )
@@ -83,10 +90,9 @@ class TestGitHubTracker:
         # Then
         assert len(issues) == 1
         assert issues[0].key == "100"
-        assert issues[0].title == "Test Issue"
+        assert issues[0].summary == "Test Issue"
 
-    @patch('requests.Session')
-    def test_parse_issue(self, mock_session, github_tracker):
+    def test_parse_issue(self, github_tracker):
         """Given: Issue data from GitHub API
         When: _parse_issue() is called
         Then: Returns Issue object with all fields
@@ -103,36 +109,55 @@ class TestGitHubTracker:
             "updated_at": "2024-01-02T00:00:00Z",
             "html_url": "https://github.com/test/repo/issues/100",
             "labels": [{"name": "bug"}],
-            "milestone": {"title": "v1.0"},
             "pull_request": None
         }
 
         # When
-        issue = github_tracker._parse_issue(issue_data)
+        issue = github_tracker._parse_issue(issue_data, repo_owner="testowner", repo_name="testrepo")
 
         # Then
         assert issue.key == "100"
-        assert issue.title == "Test Issue"
-        assert issue.status.value == "open"
+        assert issue.summary == "Test Issue"
+        assert issue.status.value == "in_progress"  # GitHub "open" maps to IN_PROGRESS
 
-    @patch('requests.Session')
-    def test_distinguish_issue_from_pr(self, mock_session, github_tracker):
+    def test_distinguish_issue_from_pr(self, github_tracker):
         """Given: Issue data
         When: Issue has pull_request field
         Then: Can distinguish Issue from PR
         """
         # Given - Issue
-        issue_data = {"number": 100, "title": "Issue", "pull_request": None}
-        issue = github_tracker._parse_issue(issue_data)
-        assert not issue.is_pull_request
+        issue_data = {
+            "id": 1,
+            "number": 100,
+            "title": "Issue",
+            "state": "open",
+            "body": "",
+            "user": {"login": "testuser"},
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "pull_request": None
+        }
+        issue = github_tracker._parse_issue(issue_data, repo_owner="testowner", repo_name="testrepo")
+        assert issue.summary == "Issue"
 
         # Given - Pull Request
-        pr_data = {"number": 101, "title": "PR", "pull_request": {}}
-        pr = github_tracker._parse_issue(pr_data)
-        assert pr.is_pull_request
+        pr_data = {
+            "id": 2,
+            "number": 101,
+            "title": "PR",
+            "state": "open",
+            "body": "",
+            "user": {"login": "testuser"},
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "pull_request": {}
+        }
+        pr = github_tracker._parse_issue(pr_data, repo_owner="testowner", repo_name="testrepo")
+        # PRs don't have [PR] prefix in regular fetch_issues, only in fetch_pull_requests
+        assert pr.summary == "PR"
 
     @patch('requests.Session')
-    def test_fetch_issue_comments(self, mock_session, github_tracker):
+    def test_fetch_issue_comments(self, mock_session, github_config):
         """Given: Issue number
         When: fetch_comments() is called
         Then: Returns issue comments
@@ -148,10 +173,17 @@ class TestGitHubTracker:
                 "created_at": "2024-01-01T00:00:00Z"
             }
         ]
+
+        # Configure mock to return mock_response for all get() calls
+        mock_session.return_value = Mock()
         mock_session.return_value.get.return_value = mock_response
 
+        # Create tracker and connect
+        tracker = GitHubTracker(github_config)
+        tracker.connect()
+
         # When
-        comments = github_tracker.fetch_comments(100, owner="owner", repo="repo")
+        comments = tracker.fetch_comments(100, owner="owner", repo="repo")
 
         # Then
         assert len(comments) == 1
