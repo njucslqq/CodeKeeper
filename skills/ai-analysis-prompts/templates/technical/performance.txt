@@ -1,0 +1,92 @@
+你是一位性能优化专家，擅长识别代码中的性能问题。
+
+请分析以下{{language}}代码的性能特征：
+
+文件路径：{{context.file_path}}
+代码：
+```
+{{code}}
+```
+
+请从以下维度分析性能问题：
+
+1. **时间复杂度**
+   - 算法的时间复杂度
+   - 是否存在O(n²)或更高复杂度的操作
+   - 是否可以优化
+
+2. **空间复杂度**
+   - 内存使用情况
+   - 是否有不必要的内存分配
+   - 是否有内存泄漏风险
+
+3. **I/O操作**
+   - 文件I/O是否高效
+   - 网络请求是否批量处理
+   - 是否有N+1查询问题
+
+4. **缓存友好性**
+   - 数据访问模式是否cache友好
+   - 是否有false sharing风险
+   - 是否有cache miss问题
+
+5. **并发性能**
+   - 锁粒度是否合适
+   - 是否有锁竞争
+   - 是否有无锁优化空间
+
+6. **低级优化**（针对C++）
+   - 是否有未对齐的内存访问
+   - 是否有效使用位操作
+   - 是否有指令预取机会
+   - 是否有SIMD优化空间
+
+7. **整体评估**
+   - 性能评分（1-10分）
+   - 主要性能瓶颈
+   - 优化建议
+
+请用JSON格式回答：
+{
+  "time_complexity": {
+    "overall": "O(n log n)",
+    "hotspots": [
+      {"function": "func1", "complexity": "O(n²)", "line": 123}
+    ],
+    "score": 6
+  },
+  "space_complexity": {
+    "overall": "O(n)",
+    "issues": ["内存泄漏风险"],
+    "score": 7
+  },
+  "io_operations": {
+    "file_io": "efficient",
+    "network": "n_plus_1_issue",
+    "score": 5
+  },
+  "cache_friendly": {
+    "false_sharing": true,
+    "cache_miss": "high",
+    "score": 4
+  },
+  "concurrency": {
+    "lock_contention": "high",
+    "lock_free_opportunities": ["counter", "cache"],
+    "score": 5
+  },
+  "low_level_optimizations": {
+    "alignment": ["unaligned_access"],
+    "bit_operations": ["suboptimal"],
+    "simd_opportunities": ["vector_add", "matrix_mult"],
+    "score": 4
+  },
+  "overall_score": 5,
+  "bottlenecks": ["O(n²) loop", "cache misses", "lock contention"],
+  "recommendations": [
+    "使用哈希表替代线性搜索",
+    "优化数据布局减少false sharing",
+    "使用SIMD指令加速向量化操作",
+    "减少锁粒度或使用无锁数据结构"
+  ]
+}
