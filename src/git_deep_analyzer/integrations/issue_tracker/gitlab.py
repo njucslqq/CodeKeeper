@@ -296,7 +296,7 @@ class GitLabTracker(IssueTrackerBase):
         author_data = comment_data.get("author", {})
 
         return IssueComment(
-            id=str(comment_data.get("id", "")),
+            id_str=str(comment_data.get("id", "")),
             author=author_data.get("username", ""),
             author_email=author_data.get("email", ""),
             content=comment_data.get("body", "") or "",

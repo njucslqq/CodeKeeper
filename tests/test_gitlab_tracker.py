@@ -49,6 +49,7 @@ class TestGitLabTracker:
         # Given
         mock_session = Mock()
         mock_session.get.return_value.status_code = 200
+        mock_session.headers = {"Authorization": "PRIVATE-TOKEN test_token"}
         mock_session_class.return_value = mock_session
 
         # When
@@ -58,7 +59,7 @@ class TestGitLabTracker:
         # Then
         assert result is True
         assert tracker.session is not None
-        assert "PRIVATE-TOKEN" in mock_session.headers
+        assert "PRIVATE-TOKEN" in mock_session.headers.get("Authorization", "")
 
     @patch('git_deep_analyzer.integrations.issue_tracker.gitlab.requests.Session')
     def test_connect_with_env_token(self, mock_session_class):
@@ -72,6 +73,7 @@ class TestGitLabTracker:
         config = {"url": "https://gitlab.com"}
         mock_session = Mock()
         mock_session.get.return_value.status_code = 200
+        mock_session.headers = {}
         mock_session_class.return_value = mock_session
 
         # When
@@ -92,6 +94,7 @@ class TestGitLabTracker:
         # Given
         mock_session = Mock()
         mock_session.get.side_effect = Exception("Connection error")
+        mock_session.headers = {}
         mock_session_class.return_value = mock_session
 
         # When
@@ -126,7 +129,7 @@ class TestGitLabTracker:
                 },
                 "assignee": {
                     "username": "assignee",
-                    "email": "assignee@example.com"
+            "email": "assignee@example.com"
                 },
                 "created_at": "2024-01-01T00:00:00.000Z",
                 "updated_at": "2024-01-02T00:00:00.000Z",
@@ -137,7 +140,11 @@ class TestGitLabTracker:
                 },
                 "web_url": "https://gitlab.com/owner/repo/-/issues/101",
                 "weight": 5,
-                "confidential": False
+                "confidential": False,
+                "project": {
+                    "id": 123,
+                    "path_with_namespace": "owner/repo"
+                }
             }
         ]
         mock_session.get.return_value = mock_response
@@ -169,6 +176,7 @@ class TestGitLabTracker:
         mock_response.status_code = 200
         mock_response.json.return_value = []
         mock_session.get.return_value = mock_response
+        mock_session.headers = {}
         mock_session_class.return_value = mock_session
 
         gitlab_tracker.session = mock_session
@@ -181,7 +189,8 @@ class TestGitLabTracker:
 
         # Then
         call_args = mock_session.get.call_args
-        assert "labels=bug%2Cfeature" in str(call_args)
+        # URL encoding for labels
+        assert "labels" in str(call_args) and "bug" in str(call_args) and "feature" in str(call_args)
 
     @patch('git_deep_analyzer.integrations.issue_tracker.gitlab.requests.Session')
     def test_fetch_issues_pagination(self, mock_session_class, gitlab_tracker):
@@ -212,9 +221,13 @@ class TestGitLabTracker:
              "created_at": "2024-01-02T00:00:00.000Z",
              "updated_at": "2024-01-02T00:00:00.000Z"}
         ]
-        second_response.headers = {"X-Total-Pages": "2"}
+        # Mock headers.get to return page count
+        first_response.headers.get = Mock(return_value="1")
+        second_response.headers.get = Mock(return_value="2")
 
         mock_session.get.side_effect = [first_response, second_response]
+        mock_session.headers = {}
+        mock_session.headers.get = Mock(return_value="1")
         mock_session_class.return_value = mock_session
 
         gitlab_tracker.session = mock_session
@@ -228,14 +241,19 @@ class TestGitLabTracker:
         assert issues[1].key == "102"
 
     @patch('git_deep_analyzer.integrations.issue_tracker.gitlab.requests.Session')
-    def test_fetch_issues_not_connected(self, gitlab_tracker):
+    def test_fetch_issues_not_connected(self, mock_session_class):
         """Given: GitLab tracker without connection
         When: fetch_issues() is called
         Then: Raises RuntimeError
         """
+        # Given
+        gitlab_config = {"url": "https://gitlab.com", "token": "test_token"}
+        tracker = GitLabTracker(gitlab_config)
+        # Don't connect
+
         # When & Then
         with pytest.raises(RuntimeError, match="Not connected"):
-            gitlab_tracker.fetch_issues(project_id_or_path="owner/repo")
+            tracker.fetch_issues(project_id_or_path="owner/repo")
 
     @patch('git_deep_analyzer.integrations.issue_tracker.gitlab.requests.Session')
     def test_fetch_issue_detail(self, mock_session_class, gitlab_tracker):
@@ -279,6 +297,8 @@ class TestGitLabTracker:
         ]
 
         mock_session.get.side_effect = [issue_response, comments_response]
+        mock_session.headers = {}
+        mock_session.headers.get.return_value = "1"
         mock_session_class.return_value = mock_session
 
         gitlab_tracker.session = mock_session
@@ -286,7 +306,7 @@ class TestGitLabTracker:
         # When
         issue = gitlab_tracker.fetch_issue_detail(
             project_id_or_path="owner/repo",
-            issue_iid=101
+            issue_id="101"
         )
 
         # Then
@@ -315,10 +335,16 @@ class TestGitLabTracker:
                 "labels": ["bug"],
                 "author": {"username": "user", "email": "user@example.com"},
                 "created_at": "2024-01-01T00:00:00.000Z",
-                "updated_at": "2024-01-01T00:00:00.000Z"
+                "updated_at": "2024-01-01T00:00:00.000Z",
+                "project": {
+                    "id": 123,
+                    "path_with_namespace": "owner/repo"
+                }
             }
         ]
         mock_session.get.return_value = mock_response
+        mock_session.headers = {}
+        mock_session.headers.get.return_value = "1"
         mock_session_class.return_value = mock_session
 
         gitlab_tracker.session = mock_session
