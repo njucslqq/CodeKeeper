@@ -97,13 +97,16 @@ class ImpactAnalyzer(BaseAnalyzer):
         code_text = code or ""
         lang_text = language or "unknown"
 
+        current_code_part = ""
+        if code_text:
+            current_code_part = f"\nCurrent Code ({lang_text}):\n{code_text}\n"
+
         prompt = f"""
         Analyze the impact of the following code changes:
 
         Changes/Diff:
         {diff}
-
-        {f'Current Code ({lang_text}):\n{code_text}\n' if code_text else ''}
+        {current_code_part}
 
         Assess:
         1. Affected components and areas
@@ -152,6 +155,9 @@ class DebtAnalyzer(BaseAnalyzer):
         Technical debt analysis results
         """
         commits_text = commits or ""
+        commits_part = ""
+        if commits_text:
+            commits_part = f"Commit Context:\n{commits_text}\n"
 
         prompt = f"""
         Analyze the following {language} code for technical debt:
@@ -159,7 +165,7 @@ class DebtAnalyzer(BaseAnalyzer):
         Code:
         {code}
 
-        {f'Commit Context:\n{commits_text}\n' if commits_text else ''}
+        {commits_part}
 
         Identify:
         1. Code smells and anti-patterns

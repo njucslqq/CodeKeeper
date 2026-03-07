@@ -258,8 +258,9 @@ class GitLabTracker(IssueTrackerBase):
             resolved_at = datetime.fromisoformat(closed_at_str.replace("Z", "+00:00"))
 
         # 解析项目信息
-        project_id = issue_data.get("project_id", "")
-        project_name = issue_data.get("project", {}).get("path_with_namespace", "")
+        project_dict = issue_data.get("project", {})
+        project_id = project_dict.get("id", "")
+        project_name = project_dict.get("path_with_namespace", "")
 
         return Issue(
             id=str(issue_data.get("id", "")),

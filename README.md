@@ -281,3 +281,153 @@ ruff check src/
 ## 许可证
 
 Apache 2.0 License - 详见 [LICENSE](LICENSE) 文件
+
+## 生产环境部署
+
+### 自动化部署
+
+项目包含自动化部署脚本，支持 Linux/macOS 系统：
+
+```bash
+# 克隆仓库
+git clone git@github.com:njucslqq/CodeKeeper.git
+cd CodeKeeper
+
+# 运行部署脚本（需要 root 权限）
+sudo bash scripts/deploy_production.sh
+```
+
+### 部署脚本功能
+
+部署脚本会自动完成以下操作：
+
+1. **安装系统依赖**：Python 3、Git、虚拟环境工具
+2. **创建服务用户**：`gitanalyzer`
+3. **安装仓库**：`/opt/git-deep-analyzer`
+4. **配置虚拟环境**：自动创建和激活
+5. **安装依赖**：包括可选的 C++ 支持包
+6. **创建配置目录**：`/etc/gitanalyzer/`
+7. **创建日志目录**：`/var/log/gitanalyzer`
+8. **配置 systemd 服务**：`/etc/systemd/system/gitanalyzer.service`
+9. **配置定时任务**：每天凌晨 2 点自动运行
+10. **配置日志轮转**：自动管理日志文件
+
+### 服务管理
+
+```bash
+# 启动服务
+sudo systemctl start gitanalyzer
+
+# 停止服务
+sudo systemctl stop gitanalyzer
+
+# 重启服务
+sudo systemctl restart gitanalyzer
+
+# 查看服务状态
+sudo systemctl status gitanalyzer
+
+# 查看服务日志
+sudo journalctl -u gitanalyzer -f
+
+# 启用定时任务
+sudo systemctl start gitanalyzer.timer
+
+# 禁用定时任务
+sudo systemctl stop gitanalyzer.timer
+```
+
+### 配置文件
+
+**环境变量文件**：`/etc/gitanalyzer/.env`
+
+```bash
+# 编辑环境配置
+sudo vim /etc/gitanalyzer/.env
+
+# 配置 AI API 密钥
+OPENAI_API_KEY=your-key-here
+# ANTHROPIC_API_KEY=your-key-here
+
+# 配置外部系统认证
+JIRA_TOKEN=your-jira-token
+CONFLUENCE_TOKEN=your-confluence-token
+```
+
+**主配置文件**：`/etc/gitanalyzer/.git-deep-analyzer.yaml`
+
+```bash
+# 编辑主配置
+sudo vim /etc/gitanalyzer/.git-deep-analyzer.yaml
+
+# 指定要分析的仓库
+git:
+  repo_path: /path/to/your/repo
+  branch: main
+
+# 配置 AI 分析
+analysis:
+  ai_provider: openai  # 或 claude_cli, codex_cli
+  ai_model: gpt-4
+
+# 集成外部系统
+external:
+  jira:
+    url: https://your-domain.atlassian.net
+    token: ${JIRA_TOKEN}
+  confluence:
+    url: https://your-domain.atlassian.net/wiki
+    token: ${CONFLUENCE_TOKEN}
+```
+
+### 手动部署
+
+如需手动部署，请参考 `docs/DEPLOYMENT.md` 中的详细步骤。
+
+### Docker 部署（可选）
+
+如需使用 Docker 部署，请创建 `Dockerfile`：
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 安装系统依赖
+RUN apt-get update && apt-get install -y \
+    git \
+    python3-pip
+
+# 复制项目文件
+COPY . /app
+
+# 安装 Python 依赖
+RUN pip3 install --no-cache-dir -e ".[cpp]"
+
+# 创建非 root 用户
+RUN useradd -m -s /bin/bash appuser
+
+# 切换到非 root 用户
+USER appuser
+
+# 暴露端口
+EXPOSE 8000
+
+# 启动命令
+CMD ["git-deep-analyze", "--help"]
+```
+
+```bash
+# 构建镜像
+docker build -t git-deep-analyzer .
+
+# 运行容器
+docker run -v /path/to/repo:/data \
+  -v /path/to/config/.git-deep-analyzer.yaml:/config \
+  git-deep-analyzer
+```
+
+---
+
+EOF
+cat /Users/vincent/ai/gcr/README.md

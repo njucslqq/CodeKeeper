@@ -294,5 +294,5 @@ class CodexCLIClient(AIClientBase):
 
 
 # Register CLI clients with factory
-AIClientFactory.register("claude-cli", ClaudeCLIClient)
-AIClientFactory.register("codex-cli", CodexCLIClient)
+AIClientFactory.register_client("claude-cli", ClaudeCLIClient)
+AIClientFactory.register_client("codex-cli", CodexCLIClient)

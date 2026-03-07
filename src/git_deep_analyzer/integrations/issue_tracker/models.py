@@ -38,16 +38,16 @@ class Issue:
         labels: List[str],
         created_at: datetime,
         updated_at: datetime,
-        resolved_at: Optional[datetime] = None,
         reporter: str,
         reporter_email: str,
+        project_key: str,
+        project_name: str,
+        resolved_at: Optional[datetime] = None,
         assignee: Optional[str] = None,
         assignee_email: Optional[str] = None,
         comments: Optional[List["IssueComment"]] = None,
         attachments: Optional[List["IssueAttachment"]] = None,
-        relations: Optional[List["IssueRelation"]] = None,
-        project_key: str,
-        project_name: str
+        relations: Optional[List["IssueRelation"]] = None
     ):
         """初始化Issue
 
@@ -61,16 +61,16 @@ class Issue:
             labels: 标签列表
             created_at: 创建时间
             updated_at: 更新时间
-            resolved_at: 解决时间
             reporter: 作者
             reporter_email: 作者邮箱
+            project_key: 项目key
+            project_name: 项目名称
+            resolved_at: 解决时间
             assignee: 指派人
             assignee_email: 指派人邮箱
             comments: 评论列表
             attachments: 附件列表
             relations: 关联列表
-            project_key: 项目key
-            project_name: 项目名称
         """
         self.id = id
         self.key = key

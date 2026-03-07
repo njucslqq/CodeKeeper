@@ -1,7 +1,7 @@
 """Python code parser using AST."""
 
 import ast
-from typing import List, Dict
+from typing import List, Dict, Any
 from pathlib import Path
 from .base import BaseParser
 
