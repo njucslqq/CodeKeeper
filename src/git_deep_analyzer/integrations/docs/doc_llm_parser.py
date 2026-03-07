@@ -1,8 +1,12 @@
 """DocLLM Parser - LLM-based document analysis."""
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, TYPE_CHECKING
 from datetime import datetime
 from .models import Document, DocumentType
+
+if TYPE_CHECKING:
+    from typing import Callable
+    from .logger import AILogger
 
 
 class DocLLMParser:
@@ -11,7 +15,7 @@ class DocLLMParser:
     用于深度分析文档内容，提取需求、识别业务目标、分析设计元素
     """
 
-    def __init__(self, ai_client, logger=None):
+    def __init__(self, ai_client: Any, logger: Optional[Any] = None):
         """初始化DocLLM Parser
 
         Args:
@@ -50,7 +54,7 @@ class DocLLMParser:
             except Exception as e:
                 results["requirements_analysis"] = {"error": str(e)}
                 if self.logger:
-                    self.logger.log_error("DocLLMParser.requirements", e)
+                    self.logger.log_error("DocLLMParser.extract_requirements", e)
 
         # 业务目标识别
         if "goals" in dimensions:
