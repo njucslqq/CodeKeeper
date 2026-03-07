@@ -1,9 +1,19 @@
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
 import yaml
 import os
 from datetime import datetime
+
+
+class ConfigError:
+    """配置错误"""
+    def __init__(self, field: str, message: str):
+        self.field = field
+        self.message = message
+
+    def __str__(self):
+        return f"{self.field}: {self.message}"
 
 
 @dataclass
@@ -156,3 +166,28 @@ class Config:
         if self.ai.provider.api_key and self.ai.provider.api_key.startswith("${"):
             var_name = self.ai.provider.api_key[2:-1]
             self.ai.provider.api_key = os.environ.get(var_name)
+
+    def validate(self, skip_connection_test: bool = False) -> List[ConfigError]:
+        """验证配置"""
+        errors = []
+
+        # 验证Git仓库
+        if not self.analysis.git.repo_path.exists():
+            errors.append(ConfigError("git.repo_path", "repository path does not exist"))
+        elif not (self.analysis.git.repo_path / ".git").exists():
+            errors.append(ConfigError("git.repo_path", "not a git repository"))
+
+        # 验证时间过滤配置
+        if self.analysis.git.time_filter_mode == "date_range":
+            if not self.analysis.git.time_filter_date_range_since:
+                errors.append(ConfigError("git.time_filter.since", "since date is required"))
+        elif self.analysis.git.time_filter_mode == "last_n_days":
+            if not self.analysis.git.time_filter_last_n_days:
+                errors.append(ConfigError("git.time_filter.days", "days is required"))
+
+        # 验证AI配置
+        if self.ai.enabled:
+            if not self.ai.provider.api_key and not os.environ.get("OPENAI_API_KEY"):
+                errors.append(ConfigError("ai.api_key", "API key is required"))
+
+        return errors
