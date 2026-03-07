@@ -1,129 +1,111 @@
-# Git Deep Analyzer - Configuration Example
-# Copy this file to config.yaml and customize for your project
+# Git Deep Analyzer 配置文件示例
+# 复制此文件为 .git-deep-analyzer.yaml 并根据需要修改
+
+git:
+  # Git仓库路径
+  repo_path: /path/to/your/repo
+
+  # 分支名称
+  branch: main
+
+  # 时间范围配置
+  time_range:
+    # 开始日期 (YYYY-MM-DD)
+    since: "2024-01-01"
+    # 结束日期 (YYYY-MM-DD)，留空表示到现在
+    until: null
+
+  # 时间基准: author_time, commit_time, merge_time
+  time_basis: author_time
 
 analysis:
-  git:
-    repo_path: /path/to/your/repository
-    branch: main
+  # AI提供商: openai, anthropic
+  ai_provider: openai
 
-    # Time filter options
-    time_filter:
-      mode: date_range  # Options: date_range, last_n_days
+  # AI模型
+  ai_model: gpt-4
 
-      # For date_range mode:
-      date_range:
-        since: "2024-01-01"  # Start date (YYYY-MM-DD)
-        until: null          # End date (optional, null = now)
-
-      # For last_n_days mode:
-      # last_n_days:
-      #   days: 30
-
-      # Time basis for commits
-      time_basis: author_time  # Options: author_time, commit_time, merge_time
-
-  languages:
-    primary: [cpp, python]
-    fallback: auto
-
-  output:
-    formats: [html, markdown]
-    directory: ./reports
-    filename_pattern: "{repo}-{branch}-{timestamp}"
-
-# AI Analysis Configuration
-ai:
-  enabled: true
-
-  # API Provider (OpenAI, Anthropic, etc.)
-  provider:
-    type: api
-    name: openai
-    model: gpt-4o
-    api_key: ${OPENAI_API_KEY}  # Use environment variable
-    base_url: null  # Optional: custom API endpoint
-    max_tokens: 4000
-    temperature: 0.3
-
-  # CLI Provider (Claude CLI, Codex CLI, etc.)
-  # cli:
-  #   command: claude
-  #   args:
-  #     - "analyze"
-  #     - "--prompt"
-  #     - "{prompt}"
-  #     - "--file"
-  #     - "{file_path}"
-  #     - "--output"
-  #     - "json"
-  #   env_vars:
-  #     - "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}"
-
-  # Error Handling
-  error_handling:
-    retry:
-      enabled: true
-      max_attempts: 3
-      backoff: exponential
-    timeout:
-      enabled: true
-      seconds: 300
-    on_failure: retry  # Options: retry, continue, abort, fallback
-
-  # Logging
-  logging:
-    level: debug  # Options: debug, info, warn, error
-    log_file: ./ai_analysis.log
-    log_to_stdout: true
-
-  # Execution Strategy
-  execution_strategy: serial  # Options: serial, parallel, layered, incremental
-
-# Reporting Configuration
-reporting:
-  sections:
-    - overview
-    - technical_analysis
-    - business_analysis
+  # 分析维度
+  dimensions:
+    - technical
+    - business
     - evolution
-    - recommendations
 
-  include_raw_data: false
-  language: zh-CN
-  detail_level: standard  # Options: concise, standard, detailed
+  # 执行策略: serial, parallel, layered, incremental
+  execution_strategy: parallel
 
-# External System Integrations (Optional)
-integrations:
-  enabled: false
-  plugin_path: ./integrations
+  # 重试配置
+  retry:
+    max_retries: 3
+    base_delay: 1.0
+    max_delay: 60.0
+    failure_behavior: retry  # retry, continue, abort, fallback
 
-  issue_tracker:
-    type: jira  # Options: jira, gitlab, github, none
-    enabled: false
-    config:
-      url: https://your-domain.atlassian.net
-      token: ${JIRA_TOKEN}
-      project_key: PROJ
+# 外部系统集成配置
+external:
+  # Jira配置
+  jira:
+    # Jira服务器URL
+    url: https://your-domain.atlassian.net
 
-  docs:
-    enabled: false
-    sources:
-      - type: confluence
-        enabled: false
-        config:
-          url: https://your-domain.atlassian.net/wiki
-          token: ${CONFLUENCE_TOKEN}
-          space_key: DEV
+    # 认证方式:
+    # 方式1: Personal Access Token
+    token: ${JIRA_TOKEN}
 
-      - type: feishu
-        enabled: false
-        config:
-          token: ${FEISHU_TOKEN}
+    # 方式2: Basic Auth
+    # username: ${JIRA_USERNAME}
+    # password: ${JIRA_PASSWORD}
 
-# Commit Convention (Optional)
-commit_convention:
-  type: conventional_commits  # Options: conventional_commits, custom, none
-  spec_path: docs/commit-spec.md
-  patterns:
-    - "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore):"
-    - "^\\[\\w+\\] .+"
+    # JQL查询
+    jql: "project = YOUR_PROJECT"
+
+  # Confluence配置
+  confluence:
+    # Confluence服务器URL
+    url: https://your-domain.atlassian.net/wiki
+
+    # 认证
+    token: ${CONFLUENCE_TOKEN}
+
+    # 空间key
+    space_key: YOUR_SPACE
+
+# 报告配置
+reporting:
+  # 输出格式: html, markdown
+  format: html
+
+  # 详细程度: concise, standard, detailed
+  detail_level: standard
+
+  # 输出目录
+  output_dir: ./reports
+
+  # 文件名格式: {repo}-{branch}-{timestamp}.{ext}
+  filename_format: "{repo}-{branch}-{timestamp}.{ext}"
+
+  # 交互功能
+  interactive:
+    enable_search: true
+    enable_filter: true
+    enable_collapse: true
+    enable_detail_switch: true
+
+# 日志配置
+logging:
+  # 日志级别: debug, info, warning, error
+  level: info
+
+  # 日志输出
+  log_to_console: true
+  log_to_file: true
+  log_file: ./git-deep-analyzer.log
+
+  # 记录AI请求和响应
+  log_ai_requests: true
+  log_ai_responses: true
+
+  # 记录性能指标
+  log_performance: true
+CONFIG
+cat /Users/vincent/ai/gcr/config.yaml.example

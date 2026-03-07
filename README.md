@@ -1,77 +1,283 @@
 # Git Deep Analyzer
 
-AI-powered deep analysis of git repositories.
+基于AI驱动的Git提交深度分析工具，提供技术、业务和演进三个维度的深度洞察。
 
-## Features
+## 功能特性
 
-- Multi-language code analysis (C++, Python, and more)
-- Integration with external systems (Jira, GitLab, Confluence, Feishu)
-- AI-driven technical, business, and evolution analysis
-- Multiple output formats (HTML, Markdown)
-- Interactive reports with visualization
+### 核心功能
+- ✅ Git仓库采集和代码分析
+- ✅ 多语言支持（Python、C++、JavaScript等20+种语言）
+- ✅ AI驱动的智能分析（技术质量、业务价值、演进趋势）
+- ✅ 多格式报告生成（HTML、Markdown）
+- ✅ 数据可视化（折线图、饼图、柱状图、热力图等）
+- ✅ 外部系统集成（Jira、Confluence）
 
-## Installation
+### AI分析维度
+
+#### 技术维度
+- 代码质量分析（命名规范、复杂度、重复代码）
+- 设计模式识别（单例、工厂、观察者等）
+- 并发分析（线程、锁、async/await）
+- 性能分析（时间/空间复杂度、I/O优化）
+- 架构分析（代码组织、耦合度、内聚度）
+
+#### 业务维度
+- 需求提取（功能性、非功能性需求）
+- 需求实现对齐（覆盖率、差距分析）
+- 规格合规性（API规范、数据格式）
+- 业务目标分析（目标-功能映射）
+
+#### 演进维度
+- 时间线分析（开发阶段、活动模式）
+- 影响分析（变更范围、风险评估）
+- 技术债务识别（代码债务分类）
+
+### 报告功能
+- 多详细程度支持（简洁/标准/详细）
+- 交互功能（搜索、过滤、折叠展开）
+- 响应式设计（支持移动端）
+- 数据可视化（Chart.js集成）
+
+## 安装
+
+### 基础安装
 
 ```bash
 pip install -e .
 ```
 
-## Usage
-
-Basic usage:
+### 完整安装（包含C++支持）
 
 ```bash
-git-deep-analyze --repo /path/to/repo --since "2024-01-01"
+pip install -e ".[cpp]"
 ```
 
-With all options:
+### 开发安装
 
 ```bash
-git-deep-analyze \
-  --repo /path/to/repo \
-  --branch main \
-  --since "2024-01-01" \
-  --until "2024-12-31" \
-  --format html,markdown \
-  --ai-provider openai \
-  --ai-model gpt-4o
+pip install -e ".[dev, cpp]"
 ```
 
-## Configuration
+## 配置
 
-Create a `config.yaml` file:
+### 快速开始
+
+```bash
+# 初始化配置文件
+git-deep-analyze init
+
+# 分析Git仓库
+git-deep-analyze analyze --repo /path/to/repo --branch main
+```
+
+### 配置文件
+
+创建 `.git-deep-analyzer.yaml`：
 
 ```yaml
+git:
+  repo_path: /path/to/repo
+  branch: main
+  time_range:
+    since: "2024-01-01"
+    until: "2024-12-31"
+  time_basis: author_time
+
 analysis:
-  git:
-    repo_path: /path/to/repo
-    branch: main
-    time_filter:
-      mode: date_range
-      date_range:
-        since: "2024-01-01"
+  ai_provider: openai
+  ai_model: gpt-4
+  dimensions:
+    - technical
+    - business
+    - evolution
+  execution_strategy: parallel
 
-ai:
-  enabled: true
-  provider:
-    type: api
-    name: openai
-    model: gpt-4o
-    api_key: ${OPENAI_API_KEY}
+external:
+  jira:
+    url: https://your-domain.atlassian.net
+    token: ${JIRA_TOKEN}
+  confluence:
+    url: https://your-domain.atlassian.net/wiki
+    token: ${CONFLUENCE_TOKEN}
 
-reporting:
-  language: zh-CN
+output:
+  format: html
   detail_level: standard
+  output_dir: ./reports
 ```
 
-## Development
+### AI API配置
 
-Run tests:
+**OpenAI:**
+```bash
+export OPENAI_API_KEY="your-api-key"
+```
+
+**Anthropic (Claude):**
+```bash
+export ANTHROPIC_API_KEY="your-api-key"
+```
+
+### 外部系统认证
+
+**Jira:**
+```bash
+export JIRA_TOKEN="your-personal-access-token"
+# 或
+export JIRA_USERNAME="your-email"
+export JIRA_PASSWORD="your-api-token"
+```
+
+**Confluence:**
+```bash
+export CONFLUENCE_TOKEN="your-personal-access-token"
+```
+
+## 使用示例
+
+### 基本分析
 
 ```bash
-python3 -m pytest
+git-deep-analyze analyze \
+  --repo /path/to/repo \
+  --branch main \
+  --since "2024-01-01"
 ```
 
-## License
+### 指定输出格式
 
-MIT
+```bash
+git-deep-analyze analyze \
+  --repo /path/to/repo \
+  --format html \
+  --detail-level detailed \
+  --output ./reports/my-report.html
+```
+
+### 集成外部系统
+
+```bash
+git-deep-analyze analyze \
+  --repo /path/to/repo \
+  --jira-url https://your-domain.atlassian.net \
+  --confluence-url https://your-domain.atlassian.net/wiki
+```
+
+## 测试
+
+```bash
+# 安装测试依赖
+pip install -e ".[dev, cpp]"
+
+# 运行所有测试
+pytest
+
+# 运行测试并生成覆盖率报告
+pytest --cov=src/git_deep_analyzer --cov-report=html
+
+# 只运行单元测试
+pytest -m unit
+
+# 运行特定测试
+pytest tests/test_git_collector.py -v
+```
+
+## 项目结构
+
+```
+git_deep_analyzer/
+├── ai/                    # AI分析层
+│   ├── clients.py          # AI客户端（OpenAI、Anthropic）
+│   ├── technical_analyzer.py    # 技术维度分析
+│   ├── business_analyzer.py     # 业务维度分析
+│   ├── evolution_analyzer.py     # 演进维度分析
+│   ├── retry_handler.py         # 错误处理和重试
+│   ├── logger.py                # 日志记录
+│   └── analysis_strategy.py      # 分析执行策略
+├── git_collector/          # Git采集层
+│   ├── collector.py        # Git仓库采集
+│   ├── time_analyzer.py    # 时间分析
+│   └── diff_extractor.py   # 差异提取
+├── code_parser/           # 代码解析层
+│   ├── parser_python.py    # Python解析器
+│   ├── parser_cpp.py      # C++解析器
+│   ├── pattern_matcher.py  # 设计模式匹配
+│   └── concurrency_detector.py  # 并发检测
+├── integrations/          # 外部系统集成
+│   ├── issue_tracker/     # Issue跟踪器（Jira）
+│   ├── docs/             # 文档系统（Confluence）
+│   └── issue_commit_linker.py  # Issue-Commit关联
+├── reporting/            # 报告生成层
+│   ├── html_generator.py   # HTML报告
+│   ├── markdown_generator.py  # Markdown报告
+│   ├── data_visualizer.py     # 数据可视化
+│   └── multi_detail_reports.py # 多详细程度报告
+├── config/               # 配置管理
+│   ├── config.py         # 配置模型和加载
+│   └── cli.py           # CLI命令
+└── cli.py              # 主CLI入口
+```
+
+## 开发指南
+
+### 代码规范
+
+```bash
+# 格式化代码
+black src/ tests/
+
+# 排序导入
+isort src/ tests/
+
+# 类型检查
+mypy src/
+
+# 代码检查
+ruff check src/
+```
+
+### 添加新的分析器
+
+1. 在 `ai/` 目录创建新的分析器类
+2. 继承 `BaseAnalyzer`
+3. 实现 `analyze()` 方法
+4. 在对应的 `Analyzer` 类中注册
+
+### 添加新的外部系统集成
+
+1. 在 `integrations/issue_tracker/` 或 `integrations/docs/` 创建新的集成
+2. 继承 `IssueTrackerBase` 或 `DocsSystemBase`
+3. 实现必需的抽象方法
+
+## 依赖
+
+### 核心依赖
+- GitPython >= 3.1.40 - Git仓库操作
+- Jinja2 >= 3.1.2 - 模板引擎
+- openai >= 1.0.0 - OpenAI API
+- anthropic >= 0.18.0 - Anthropic API
+- requests >= 2.31.0 - HTTP客户端
+- aiohttp >= 3.9.0 - 异步HTTP
+
+### 可选依赖
+- libclang >= 16.0.0 - C++代码解析
+
+### 开发依赖
+- pytest >= 7.4.0 - 测试框架
+- pytest-cov >= 4.1.0 - 覆盖率报告
+- black >= 23.7.0 - 代码格式化
+- isort >= 5.12.0 - 导入排序
+
+## 已知限制
+
+1. **C++解析**：需要安装 clang/libclang 才能完整解析C++代码
+2. **外部系统认证**：需要有效的认证信息才能连接Jira/Confluence
+3. **AI API**：需要有效的API密钥才能使用AI分析功能
+
+## 贡献
+
+欢迎提交Issue和Pull Request！
+
+## 许可证
+
+Apache 2.0 License - 详见 [LICENSE](LICENSE) 文件
