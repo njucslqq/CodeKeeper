@@ -191,3 +191,14 @@ class Config:
                 errors.append(ConfigError("ai.api_key", "API key is required"))
 
         return errors
+
+    def reload(self, config_path: Path = None):
+        """重新加载配置"""
+        if config_path:
+            new_config = self.load_from_file(config_path)
+        else:
+            # 假设从原始文件路径重新加载
+            new_config = self.load_from_file(Path("config.yaml"))
+
+        # 更新当前配置
+        self.__dict__.update(new_config.__dict__)
