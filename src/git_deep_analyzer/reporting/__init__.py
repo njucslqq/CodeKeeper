@@ -10,6 +10,7 @@ from .html_generator import HTMLGenerator
 from .markdown_generator import MarkdownGenerator
 from .data_visualizer import DataVisualizer, ChartType
 from .report_interactions import ReportInteractions
+from .multi_detail_reports import ReportDetailAdapter
 
 __all__ = [
     "ReportFormat",
@@ -20,5 +21,6 @@ __all__ = [
     "MarkdownGenerator",
     "DataVisualizer",
     "ChartType",
-    "ReportInteractions"
+    "ReportInteractions",
+    "ReportDetailAdapter"
 ]
