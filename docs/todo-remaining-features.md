@@ -290,6 +290,14 @@
 2. **Jira/Confluence API**：需要实际的认证信息才能测试
 3. **Clang依赖**：C++解析需要安装clang
 4. **AI API密钥**：需要实际的API密钥才能测试AI分析
+5. **Python 3.9 dataclasses bug**：Python 3.9中dataclasses有已知bug导致类型错误
+
+### 测试覆盖率状态
+
+- 已安装dev依赖
+- 发现Python 3.9 dataclasses兼容性问题（内部bug，非代码问题）
+- 修复IssueComment.id冲突（重命名为id_str）
+- 完整测试需要进一步调试或使用Python 3.11
 
 ---
 
