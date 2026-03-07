@@ -22,6 +22,13 @@ from .technical_analyzer import (
     PerformanceAnalyzer,
     ArchitectureAnalyzer
 )
+from .business_analyzer import (
+    BusinessAnalyzer,
+    RequirementsAnalyzer,
+    AlignmentAnalyzer,
+    ComplianceAnalyzer,
+    GoalsAnalyzer
+)
 
 __all__ = [
     "TemplateManager",
@@ -41,5 +48,10 @@ __all__ = [
     "PatternsAnalyzer",
     "ConcurrencyAnalyzer",
     "PerformanceAnalyzer",
-    "ArchitectureAnalyzer"
+    "ArchitectureAnalyzer",
+    "BusinessAnalyzer",
+    "RequirementsAnalyzer",
+    "AlignmentAnalyzer",
+    "ComplianceAnalyzer",
+    "GoalsAnalyzer"
 ]
