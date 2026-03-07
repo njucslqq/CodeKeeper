@@ -307,8 +307,13 @@
 - ✅ 修复f-string语法错误（evolution_analyzer.py）
 - ✅ 修复AI客户端工厂方法名错误（register -> register_client）
 - ✅ 添加缺失的类型导入（Any in parser_python.py）
-- 当前测试状态：202通过 / 81失败 / 16错误
-- 剩余失败主要为测试实现问题（mock配置、测试参数）
+- ✅ 修复Issue model测试（添加project_key, project_name参数）
+- ✅ 修复technical analyzer测试（logger参数名）
+- ✅ 修复HTML/Markdown generator测试（Jinja2宏作用域问题）
+- ✅ 修复report models测试（enum.value比较）
+- ✅ 添加GitHub tracker search_issues方法
+- 当前测试状态：约150+通过 / 减少中
+- 剩余失败主要为：GitLab tracker, Git collector, retry handler, data visualizer等
 
 ---
 
