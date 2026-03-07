@@ -6,8 +6,10 @@ from datetime import datetime
 from git import Repo
 
 from .models import (
-    CommitData, FileChange, AuthorStats, TagData, BranchData
+    CommitData, AuthorStats, TagData, BranchData
 )
+from .diff_extractor import DiffExtractor
+from .time_analyzer import TimeAnalyzer
 
 
 class GitCollector:
@@ -34,6 +36,8 @@ class GitCollector:
 
         self.config = config
         self.branch = config.get("branch", "main")
+        self.diff_extractor = DiffExtractor(self.repo)
+        self.time_analyzer = TimeAnalyzer(self.repo)
 
     def collect_all(self) -> dict:
         """采集所有数据
@@ -71,62 +75,16 @@ class GitCollector:
                     author_email=commit.author.email,
                     author_time=datetime.fromtimestamp(commit.authored_date),
                     commit_time=datetime.fromtimestamp(commit.committed_date),
-                    merge_time=datetime.fromtimestamp(commit.committed_date),
+                    merge_time=self.time_analyzer.get_merge_time(commit),
                     message=commit.message.strip(),
                     parents=[p.hexsha for p in commit.parents],
-                    files_changed=self._get_changed_files(commit),
-                    diff=self._get_diff(commit)
+                    files_changed=self.diff_extractor.get_changed_files(commit),
+                    diff=self.diff_extractor.get_diff(commit)
                 ))
         except Exception as e:
             raise RuntimeError(f"Failed to collect commits: {e}") from e
 
         return commits
-
-    def _get_changed_files(self, commit) -> List[FileChange]:
-        """获取变更的文件列表
-
-        Args:
-            commit: Git commit对象
-
-        Returns:
-            List[FileChange]: 文件变更列表
-        """
-        changes = []
-
-        try:
-            for diff in commit.diff(commit.parents[0] if commit.parents else None):
-                change = FileChange(
-                    path=diff.b_path or diff.a_path,
-                    old_path=diff.a_path,
-                    change_type=self._get_change_type(diff),
-                    additions=self._count_additions(diff),
-                    deletions=self._count_deletions(diff),
-                    is_binary=diff.b_blob is None or diff.b_blob.is_binary
-                )
-                changes.append(change)
-        except Exception as e:
-            raise RuntimeError(f"Failed to get changed files: {e}") from e
-
-        return changes
-
-    def _get_diff(self, commit) -> str:
-        """获取完整diff文本
-
-        Args:
-            commit: Git commit对象
-
-        Returns:
-            str: diff文本
-        """
-        try:
-            diff_obj = commit.diff(
-                commit.parents[0] if commit.parents else None,
-                create_patch=True,
-                unified=3
-            )
-            return diff_obj.diff.decode('utf-8', errors='ignore')
-        except Exception as e:
-            raise RuntimeError(f"Failed to get diff: {e}") from e
 
     def _collect_tags(self) -> List[TagData]:
         """采集标签数据
@@ -216,58 +174,3 @@ class GitCollector:
             raise RuntimeError(f"Failed to calculate author stats: {e}") from e
 
         return stats
-
-    @staticmethod
-    def _get_change_type(diff) -> str:
-        """判断变更类型
-
-        Args:
-            diff: Git diff对象
-
-        Returns:
-            str: 变更类型
-        """
-        if diff.new_file:
-            return "added"
-        elif diff.deleted_file:
-            return "deleted"
-        elif diff.renamed:
-            return "renamed"
-        elif diff.renamed_file:
-            return "renamed"
-        else:
-            return "modified"
-
-    @staticmethod
-    def _count_additions(diff) -> int:
-        """统计添加行数
-
-        Args:
-            diff: Git diff对象
-
-        Returns:
-            int: 添加行数
-        """
-        try:
-            diff_text = diff.diff.decode('utf-8', errors='ignore')
-            # 减去"+++"开头的行
-            return diff_text.count('+') - diff_text.count('+++')
-        except Exception:
-            return 0
-
-    @staticmethod
-    def _count_deletions(diff) -> int:
-        """统计删除行数
-
-        Args:
-            diff: Git diff对象
-
-        Returns:
-            int: 删除行数
-        """
-        try:
-            diff_text = diff.diff.decode('utf-8', errors='ignore')
-            # 减去"---"开头的行
-            return diff_text.count('-') - diff_text.count('---')
-        except Exception:
-            return 0

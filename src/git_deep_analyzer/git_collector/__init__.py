@@ -9,6 +9,7 @@ from .models import (
 )
 from .collector import GitCollector
 from .time_analyzer import TimeAnalyzer
+from .diff_extractor import DiffExtractor
 
 __all__ = [
     "FileChange",
@@ -18,4 +19,5 @@ __all__ = [
     "BranchData",
     "GitCollector",
     "TimeAnalyzer",
+    "DiffExtractor",
 ]
