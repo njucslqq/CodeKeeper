@@ -14,6 +14,14 @@ from .retry_handler import (
     retry
 )
 from .logger import AILogger, LogConfig
+from .technical_analyzer import (
+    TechnicalAnalyzer,
+    QualityAnalyzer,
+    PatternsAnalyzer,
+    ConcurrencyAnalyzer,
+    PerformanceAnalyzer,
+    ArchitectureAnalyzer
+)
 
 __all__ = [
     "TemplateManager",
@@ -27,5 +35,11 @@ __all__ = [
     "TimeoutError",
     "retry",
     "AILogger",
-    "LogConfig"
+    "LogConfig",
+    "TechnicalAnalyzer",
+    "QualityAnalyzer",
+    "PatternsAnalyzer",
+    "ConcurrencyAnalyzer",
+    "PerformanceAnalyzer",
+    "ArchitectureAnalyzer"
 ]
