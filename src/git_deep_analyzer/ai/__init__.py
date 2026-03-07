@@ -29,6 +29,12 @@ from .business_analyzer import (
     ComplianceAnalyzer,
     GoalsAnalyzer
 )
+from .evolution_analyzer import (
+    EvolutionAnalyzer,
+    TimelineAnalyzer,
+    ImpactAnalyzer,
+    DebtAnalyzer
+)
 
 __all__ = [
     "TemplateManager",
@@ -53,5 +59,9 @@ __all__ = [
     "RequirementsAnalyzer",
     "AlignmentAnalyzer",
     "ComplianceAnalyzer",
-    "GoalsAnalyzer"
+    "GoalsAnalyzer",
+    "EvolutionAnalyzer",
+    "TimelineAnalyzer",
+    "ImpactAnalyzer",
+    "DebtAnalyzer"
 ]
