@@ -71,6 +71,7 @@ outputs/
 *.html
 *.md
 !README.md
+!progress.md
 !docs/**/*.md
 
 # Config files (may contain secrets)
