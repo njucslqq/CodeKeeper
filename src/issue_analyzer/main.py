@@ -15,6 +15,7 @@ if str(src_path) not in sys.path:
 from issue_analyzer.api import health_router, start_uptime_timer
 from issue_analyzer.config import Settings
 from issue_analyzer.logger import get_logger
+from issue_analyzer.metrics import registry as metrics_registry
 
 # Create FastAPI app
 app = FastAPI(
@@ -69,6 +70,13 @@ app.include_router(health_router)
 async def root():
     """Root endpoint."""
     return {"message": "Issue Deep Analyzer API", "version": "0.1.0"}
+
+
+@app.get("/metrics")
+async def metrics():
+    """Prometheus metrics endpoint."""
+    from prometheus_client import generate_latest
+    return generate_latest(metrics_registry)
 
 
 def main():
