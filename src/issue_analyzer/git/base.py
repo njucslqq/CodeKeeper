@@ -24,6 +24,12 @@ class GitClient(ABC):
         """Get diff for a commit."""
         pass
 
+    @property
+    @abstractmethod
+    def repository(self) -> str:
+        """Get repository identifier."""
+        pass
+
 
 class GitCollector:
     """Collect commits from configured Git repositories."""
