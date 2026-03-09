@@ -1,0 +1,72 @@
+# Git Repository Configuration
+git:
+  repos:
+    - type: github
+      url: https://github.com/org/repo
+      auth:
+        type: token
+        token: ${GITHUB_TOKEN}
+
+  list_method: config  # or "submodule"
+
+  # For submodule method:
+  # superproject_path: /path/to/superproject
+
+# Document Systems
+docs:
+  systems:
+    - type: confluence
+      base_url: https://company.atlassian.net
+      auth:
+        type: pat
+        api_token: ${CONFLUENCE_TOKEN}
+        email: user@company.com
+      space_key: PROJ
+
+    - type: feishu
+      base_url: https://open.feishu.cn
+      auth:
+        type: api_key
+        api_key: ${FEISHU_API_KEY}
+
+  naming_pattern: "{issue_id}-*"
+  document_types:
+    - requirements
+    - design
+
+# LLM Configuration
+llm:
+  type: claude_cli  # or "code_cli", "openai", "anthropic"
+  model: claude-3-opus-20240229
+  max_tokens: 4000
+  temperature: 0.3
+  timeout: 300
+
+# Fallback Strategy
+fallback:
+  retry_max_attempts: 3
+  retry_base_delay: 1.0
+  retry_backoff_factor: 2.0
+  use_backup_model: true
+  fallback_to_simple: true
+
+# History
+history:
+  enabled: true
+  path: ./history
+  retention_days: 30
+
+# Monitoring
+monitoring:
+  enabled: true
+  metrics_port: 9090
+  prometheus_enabled: true
+  tracing_enabled: false
+
+# Concurrency
+max_concurrent_issues: 5
+max_concurrent_dimensions: 2
+
+# Output
+output_dir: ./reports
+default_output_format: html
